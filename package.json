@@ -9,6 +9,7 @@
   "author": "Jesse R Weigel",
   "license": "MIT",
   "dependencies": {
+    "eslint": "^4.17.0",
     "inquirer": "^5.1.0"
   }
 }
