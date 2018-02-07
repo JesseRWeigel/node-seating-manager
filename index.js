@@ -8,18 +8,18 @@ const questions = [
   {
     type: 'input',
     name: 'rows',
-    message: "How many rows of seats to you have?"
+    message: 'How many rows of seats to you have?'
   },
   {
     type: 'input',
     name: 'seatsPerRow',
-    message: "How many seats in each row?",
+    message: 'How many seats in each row?'
   }
-];
+]
 
 inquirer.prompt(questions).then(answers => {
-  //Reply to user with total number of rows, seats per row, and seats.
+  // Reply to user with total number of rows, seats per row, and seats.
   const outputStr = `You have ${answers.rows} rows and ${answers.seatsPerRow} seats per row for a total of ${answers.rows * answers.seatsPerRow} seats.`
 
-  console.log(outputStr);
+  console.log(outputStr)
 })
