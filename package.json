@@ -1,0 +1,14 @@
+{
+  "name": "seating-manager",
+  "version": "1.0.0",
+  "description": "A node program to help make seating reservations.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jesse R Weigel",
+  "license": "MIT",
+  "dependencies": {
+    "inquirer": "^5.1.0"
+  }
+}
