@@ -17,6 +17,19 @@ const questions = [
   }
 ]
 
+const questionsTwo = [
+  {
+    type: 'input',
+    name: 'row',
+    message: 'What row is the seat in that you would like to reserve?'
+  },
+  {
+    type: 'input',
+    name: 'seat',
+    message: 'What seat would you like to reserve in this row?'
+  }
+]
+
 inquirer.prompt(questions).then(answers => {
   // Reply to user with total number of rows, seats per row, and seats.
   const outputStr = `You have ${answers.rows} rows and ${
@@ -28,6 +41,11 @@ inquirer.prompt(questions).then(answers => {
 
   console.log(seatingChart)
   console.log(outputStr)
+
+  inquirer.prompt(questionsTwo).then(answersTwo => {
+    seatingChart = reserveSeat(seatingChart, answersTwo.row, answersTwo.seat)
+    console.log(seatingChart)
+  })
 })
 
 const makeSeatingChart = (rows, seatsPerRow) => {
@@ -45,7 +63,13 @@ const makeSeatingChart = (rows, seatsPerRow) => {
 
 const reserveSeat = (arr, row, column) => {
   // Check to see if seat exists. Is seat open? Return true. Else, return false
-  return arr.length < row && arr[row].column < column && arr[row][column] === 0
+  if (arr.length > row && arr[row].length > column && arr[row][column] === 0) {
+    const newArr = arr
+    newArr[row][column] = 1
+    return newArr
+  }
+  console.log('So sorry. That seat is not available.')
+  return arr
 }
 
 const findSeats = (arr, numOfSeats) => {
