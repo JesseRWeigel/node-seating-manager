@@ -23,14 +23,42 @@ inquirer.prompt(questions).then(answers => {
     answers.seatsPerRow
   } seats per row for a total of ${answers.rows * answers.seatsPerRow} seats.`
 
-  // Create two dimensional array to represent seating
-  seatingChart = new Array(answers.rows)
-  for (let i = 0; i < answers.rows; i++) {
-    seatingChart[i] = new Array(answers.seatsPerRow)
-    for (let j = 0; j < answers.seatsPerRow; j++) {
-      seatingChart[i][j] = 0
-    }
-  }
+  // Pass values to makeSeatingChart function
+  seatingChart = makeSeatingChart(answers.rows, answers.seatsPerRow)
+
   console.log(seatingChart)
   console.log(outputStr)
 })
+
+const makeSeatingChart = (rows, seatsPerRow) => {
+  // Create two dimensional array to represent seating
+  let seatingChart = new Array(rows)
+  for (let i = 0; i < rows; i++) {
+    seatingChart[i] = new Array(seatsPerRow)
+    for (let j = 0; j < seatsPerRow; j++) {
+      seatingChart[i][j] = 0
+    }
+  }
+
+  return seatingChart
+}
+
+const reserveSeat = (arr, row, column) => {
+  // Check to see if seat exists. Is seat open? Return true. Else, return false
+  return arr.length < row && arr[row].column < column && arr[row][column] === 0
+}
+
+const findSeats = (arr, numOfSeats) => {
+  // Find optimum seat (middle of row 1)
+  const optimumSeat = Math.round(arr[1].length / 2)
+  // Find contiguous seats closes to optimum seat
+  // return range of seats or not available
+  // If seats open, reserve seats
+  for (let i = 0; i < columnNumbers; i++) {
+    reserveSeat(arr, row, column)
+  }
+}
+
+const seatsRemaining = arr => {
+  // Return number of open seats
+}
