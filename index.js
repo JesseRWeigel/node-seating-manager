@@ -1,4 +1,5 @@
 const inquirer = require('inquirer')
+const distance = require('manhattan')
 
 // This holds the data for seating
 let seatingChart
@@ -66,23 +67,58 @@ const reserveSeat = (arr, row, column) => {
   if (arr.length > row && arr[row].length > column && arr[row][column] === 0) {
     const newArr = arr
     newArr[row][column] = 1
+    seatsRemaining(newArr)
     return newArr
   }
   console.log('So sorry. That seat is not available.')
+  seatsRemaining(arr)
   return arr
 }
 
 const findSeats = (arr, numOfSeats) => {
+  // Reject requests for more than 10 seats
+  if (numOfSeats > 10) {
+    console.log('Sorry, no more than 10 seats can be reserved at one time.')
+    return false
+  }
   // Find optimum seat (middle of row 1)
   const optimumSeat = Math.round(arr[1].length / 2)
-  // Find contiguous seats closes to optimum seat
+  // Find contiguous seats closest to optimum seat
+  // Reject requests for more seats than one row can hold
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i].length < numOfSeats) {
+      console.log(
+        'Sorry, the rows are not long enough to accomidate that request.'
+      )
+      return false
+    }
+
+    // Skip to next row if there are not enough available seats
+    if (arr[i].filter(item => item === 0).length < numOfSeats) {
+      console.log('Not enough open seats in row ' + (i + 1))
+      return false
+    }
+    // Reject requests if there are not that many contiguous seats available
+    // loop over each row
+    // make an array of all the contiguous seats that are open, if there are none return false
+    // find manhattan distance of each of those seats
+    // return the group of seats with that distance
+    for (let j = 0; j < arr[i].length; j++) {
+      console.log('you made it this far')
+    }
+  }
   // return range of seats or not available
   // If seats open, reserve seats
-  for (let i = 0; i < columnNumbers; i++) {
+  for (let i = 0; i < seatNumbers; i++) {
     reserveSeat(arr, row, column)
   }
 }
 
 const seatsRemaining = arr => {
   // Return number of open seats
+  let openSeats = 0
+  arr.map(
+    row => (openSeats = openSeats + row.filter(item => item === 0).length)
+  )
+  console.log('Open Seats: ' + openSeats)
 }

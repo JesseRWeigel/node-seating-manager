@@ -1099,6 +1099,10 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
+manhattan@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/manhattan/-/manhattan-1.0.0.tgz#f1f2fd947231a195c6611409e6ef62930c809d68"
+
 mimic-fn@^1.0.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/mimic-fn/-/mimic-fn-1.2.0.tgz#820c86a39334640e99516928bd03fca88057d022"

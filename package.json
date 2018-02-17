@@ -9,7 +9,8 @@
   "author": "Jesse R Weigel",
   "license": "MIT",
   "dependencies": {
-    "inquirer": "^5.1.0"
+    "inquirer": "^5.1.0",
+    "manhattan": "^1.0.0"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.1",
