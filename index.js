@@ -146,7 +146,7 @@ const findSeats = (arr, numOfSeats) => {
         let manhattanTotal = 0
         item.map(
           seat =>
-            manhattanTotal + manhattan(optimumSeat, [seat.row, seat.column])
+            manhattanTotal + distance(optimumSeat, [seat.row, seat.column])
         )
         manhattanTotalsArr = [...manhattanTotalsArr, manhattanTotal]
       })
