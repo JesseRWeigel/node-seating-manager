@@ -168,6 +168,15 @@ const findSeats = (arr, numOfSeats) => {
               seatNumbers
             ]
           }
+          if (count > numOfSeats) {
+            const seatsToRemove = count - numOfSeats
+            // Remove seats from seatNumbers array
+            seatNumbers.splice(0, seatsToRemove)
+            potentialSeatCombinations = [
+              ...potentialSeatCombinations,
+              seatNumbers
+            ]
+          }
           if (j + 1 !== arr[i].length && arr[i][j + 1] === 1) {
             console.log('delete count')
             count = 0
@@ -198,7 +207,7 @@ const findSeats = (arr, numOfSeats) => {
     // console.log(
     //   'seat combos : ' + JSON.stringify(potentialSeatCombinations, null, 2)
     // )
-    // console.log('arr: ' + manhattanTotalsArr)
+    console.log('arr: ' + manhattanTotalsArr)
     const minArrVal = Math.min(...manhattanTotalsArr)
     // console.log('minarrVal: ' + minArrVal)
     const indexOfMinArrVal = manhattanTotalsArr.indexOf(minArrVal)
@@ -211,7 +220,7 @@ const findSeats = (arr, numOfSeats) => {
       findSeats(arr, answersThree.seats)
     })
 
-    // console.log(arr)
+    console.log(arr)
   }
 }
 // return range of seats or not available
