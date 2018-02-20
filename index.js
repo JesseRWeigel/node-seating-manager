@@ -1,5 +1,18 @@
 const inquirer = require('inquirer')
 const distance = require('manhattan')
+const seats = [
+  {
+    row: 1,
+    col: 2,
+    reserved: false,
+    rank: 3
+  }
+]
+
+// Create objects for each seat
+
+// When a request comes in for a seat change reserved to true, or let user know that seat is taken
+// When multiple seats requested, find the best contiguous seat of seats and reserve them
 
 // This holds the data for seating
 let seatingChart
@@ -38,6 +51,23 @@ const questionsThree = [
     message: 'How many seats would you like? (Max of 10)'
   }
 ]
+let seatData = []
+const createSeatData = (arr, optimumSeat) => {
+  arr.map((row, index) => {
+    row.map((seat, seatNum) => {
+      const score = distance(optimumSeat, [index, seatNum])
+      seatData = [
+        ...seatData,
+        {
+          row: index,
+          col: seatNum,
+          reserved: false,
+          rank: score
+        }
+      ]
+    })
+  })
+}
 
 inquirer.prompt(questions).then(answers => {
   // Reply to user with total number of rows, seats per row, and seats.
@@ -83,77 +113,105 @@ const reserveSeat = (arr, row, column) => {
   return arr
 }
 
+const reserveSeats = (arr, row, column) => {
+  // Check to see if seat exists. Is seat open? Return true. Else, return false
+  if (arr.length > row && arr[row].length > column && arr[row][column] === 0) {
+    const newArr = arr
+    newArr[row][column] = 1
+    // seatsRemaining(newArr)
+    return newArr
+  }
+  console.log('So sorry. That seat is not available.')
+  // seatsRemaining(arr)
+  return arr
+}
+
 const findSeats = (arr, numOfSeats) => {
+  // Find optimum seat (middle of row 1)
+  const optimumSeat = [0, Math.floor(arr[0].length / 2)]
   let seatNumbers = []
+  let potentialSeatCombinations = []
   // Reject requests for more than 10 seats
   if (numOfSeats > 10) {
     console.log('Sorry, no more than 10 seats can be reserved at one time.')
-    return false
-  }
-  // Find optimum seat (middle of row 1)
-  const optimumSeat = [0, Math.round(arr[1].length / 2)]
-  // Find contiguous seats closest to optimum seat
-  // Reject requests for more seats than one row can hold
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i].length < numOfSeats) {
-      console.log(
-        'Sorry, the rows are not long enough to accomidate that request.'
-      )
-      return false
-    }
-
-    // Skip to next row if there are not enough available seats
-    if (arr[i].filter(item => item === 0).length < numOfSeats) {
-      console.log('Not enough open seats in row ' + (i + 1))
-      return false
-    }
-    // Reject requests if there are not that many contiguous seats available
-    // loop over each row
-    // make an array of all the contiguous seats that are open, if there are none return false
-    // find manhattan distance of each of those seats
-    // return the group of seats with that distance
-    let count = 0
-    let potentialSeatCombinations = []
-    for (let j = 0; j < arr[i].length; j++) {
-      if (arr[i][j] === 0) {
-        count = count + 1
-      }
-      // Save this seat to the seatNumbers array
-      seatNumbers = [...seatNumbers, { row: i, column: j }]
-
-      if (count == numOfSeats) {
-        potentialSeatCombinations = [...potentialSeatCombinations, seatNumbers]
-      }
-      if (j + 1 !== arr[i].length && arr[i][j + 1] === 1) {
-        console.log('delete count')
-        count = 0
-        return null
-      }
-      console.log(potentialSeatCombinations)
-    }
-
-    if (potentialSeatCombinations.length === 0) {
-      console.log(potentialSeatCombinations)
-      console.log('Sorry, we cannot fulfill that request.')
-      seatsRemaining(arr)
-    } else if (potentialSeatCombinations.length === 1) {
-      potentialSeatCombinations[0].map(item =>
-        reserveSeat(arr, item.row, item.column)
-      )
-    } else {
-      let manhattanTotalsArr = []
-      potentialSeatCombinations.map(item => {
-        let manhattanTotal = 0
-        item.map(
-          seat =>
-            manhattanTotal + distance(optimumSeat, [seat.row, seat.column])
+  } else {
+    // Find contiguous seats closest to optimum seat
+    // Reject requests for more seats than one row can hold
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].length < numOfSeats) {
+        console.log(
+          'Sorry, the rows are not long enough to accomidate that request.'
         )
-        manhattanTotalsArr = [...manhattanTotalsArr, manhattanTotal]
-      })
-      potentialSeatCombinations[
-        potentialSeatCombinations.indexOf(Math.min(...manhattanTotalsArr))
-      ].map(item => reserveSeat(arr, item.row, item.column))
+      } else if (arr[i].filter(item => item === 0).length < numOfSeats) {
+        // Skip to next row if there are not enough available seats
+        console.log('Not enough open seats in row ' + (i + 1))
+      } else {
+        // Reject requests if there are not that many contiguous seats available
+        // loop over each row
+        // make an array of all the contiguous seats that are open, if there are none return false
+        // find manhattan distance of each of those seats
+        // return the group of seats with that distance
+        createSeatData(arr, optimumSeat)
+        // console.log('seatData: ' + JSON.stringify(seatData, null, 2))
+        let count = 0
+        // TODO: Use the seatData scores to find sets of seats with the lowest score.
+        for (let j = 0; j < arr[i].length; j++) {
+          if (arr[i][j] === 0) {
+            count = count + 1
+          }
+          // Save this seat to the seatNumbers array
+          seatNumbers = [...seatNumbers, { row: i, column: j }]
+
+          if (count == numOfSeats) {
+            potentialSeatCombinations = [
+              ...potentialSeatCombinations,
+              seatNumbers
+            ]
+          }
+          if (j + 1 !== arr[i].length && arr[i][j + 1] === 1) {
+            console.log('delete count')
+            count = 0
+          }
+        }
+      }
     }
+  }
+
+  if (potentialSeatCombinations.length === 0) {
+    console.log('Sorry, we cannot fulfill that request.')
+    // seatsRemaining(arr)
+  } else if (potentialSeatCombinations.length === 1) {
+    potentialSeatCombinations[0].map(item =>
+      reserveSeat(arr, item.row, item.column)
+    )
+  } else {
+    let manhattanTotalsArr = []
+    potentialSeatCombinations.map(item => {
+      let manhattanTotal = 0
+      item.map(
+        seat =>
+          (manhattanTotal =
+            manhattanTotal + distance(optimumSeat, [seat.row, seat.column]))
+      )
+      manhattanTotalsArr = [...manhattanTotalsArr, manhattanTotal]
+    })
+    // console.log(
+    //   'seat combos : ' + JSON.stringify(potentialSeatCombinations, null, 2)
+    // )
+    // console.log('arr: ' + manhattanTotalsArr)
+    const minArrVal = Math.min(...manhattanTotalsArr)
+    // console.log('minarrVal: ' + minArrVal)
+    const indexOfMinArrVal = manhattanTotalsArr.indexOf(minArrVal)
+    // console.log('index: ' + indexOfMinArrVal)
+    const arrVal = potentialSeatCombinations[indexOfMinArrVal]
+
+    // console.log('arrVal: ' + JSON.stringify(arrVal, null, 2))
+    arrVal.map(item => reserveSeats(arr, item.row, item.column))
+    inquirer.prompt(questionsThree).then(answersThree => {
+      findSeats(arr, answersThree.seats)
+    })
+
+    // console.log(arr)
   }
 }
 // return range of seats or not available
