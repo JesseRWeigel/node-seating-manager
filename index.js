@@ -1,18 +1,5 @@
 const inquirer = require('inquirer')
 const distance = require('manhattan')
-const seats = [
-  {
-    row: 1,
-    col: 2,
-    reserved: false,
-    rank: 3
-  }
-]
-
-// Create objects for each seat
-
-// When a request comes in for a seat change reserved to true, or let user know that seat is taken
-// When multiple seats requested, find the best contiguous seat of seats and reserve them
 
 // This holds the data for seating
 let seatingChart
