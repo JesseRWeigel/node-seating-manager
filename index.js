@@ -1,171 +1,110 @@
 const inquirer = require('inquirer')
-const distance = require('manhattan')
 
-// This holds the data for seating
-let seatingChart
+const seatingChart = []
 
-// Initial questions posed to user go here
-const questions = [
-  {
-    type: 'input',
-    name: 'rows',
-    message: 'How many rows of seats to you have?'
-  },
-  {
-    type: 'input',
-    name: 'seatsPerRow',
-    message: 'How many seats in each row?'
-  }
+const initialSetup = [{
+  type: 'input',
+  name: 'rows',
+  message: 'How many rows do you have?'
+},
+{
+  type: 'input',
+  name: 'chairsPerRow',
+  message: 'How many chairs in each row?'
+}
 ]
+const reservations = [{
+  type: 'input',
+  name: 'seats',
+  message: 'Initial reservations?'
+}]
 
-const questionsTwo = [
-  {
-    type: 'input',
-    name: 'row',
-    message: 'What row is the seat in that you would like to reserve?'
-  },
-  {
-    type: 'input',
-    name: 'seat',
-    message: 'What seat would you like to reserve in this row?'
-  }
-]
+const requestedSeats = [{
+  type: 'input',
+  name: 'number',
+  message: 'Number of seats?'
+}]
 
-const questionsThree = [
-  {
-    type: 'input',
-    name: 'seats',
-    message: 'How many seats would you like? (Max of 10)'
-  }
-]
-
-inquirer.prompt(questions).then(answers => {
+inquirer.prompt(initialSetup).then(answers => {
   // Reply to user with total number of rows, seats per row, and seats.
-  const outputStr = `You have ${answers.rows} rows and ${
-    answers.seatsPerRow
-  } seats per row for a total of ${answers.rows * answers.seatsPerRow} seats.`
+  createSeatingChart(answers.rows, answers.chairsPerRow)
 
-  // Pass values to makeSeatingChart function
-  seatingChart = makeSeatingChart(answers.rows, answers.seatsPerRow)
+  inquirer.prompt(reservations).then(reserved => {
+    reservedSeats(reserved.seats)
 
-  console.log(seatingChart)
-  console.log(outputStr)
-
-  inquirer.prompt(questionsTwo).then(answersTwo => {
-    seatingChart = reserveSeat(seatingChart, answersTwo.row, answersTwo.seat)
-    console.log(seatingChart)
+    inquirer.prompt(requestedSeats).then(request => {
+      findSeats(request.number)
+    })
   })
 })
 
-const makeSeatingChart = (rows, seatsPerRow) => {
-  // Create two dimensional array to represent seating
-  let seatingChart = new Array(rows)
-  for (let i = 0; i < rows; i++) {
-    seatingChart[i] = new Array(seatsPerRow)
-    for (let j = 0; j < seatsPerRow; j++) {
-      seatingChart[i][j] = 0
+/* FUNCTIONS */
+const createSeatingChart = (rows, chairs) => {
+  const centerChair = Math.floor(chairs / 2)
+  for (let r = 0; r < rows; r++) {
+    const rowArray = []
+    for (let c = 0; c < chairs; c++) {
+      const manhattanDistance = Math.abs(c - centerChair) + r
+      rowArray.push(manhattanDistance)
     }
+    seatingChart.push(rowArray)
+    console.log(rowArray)
   }
-
+  remainingSeats(seatingChart)
   return seatingChart
 }
 
-const reserveSeat = (arr, row, column) => {
-  // Check to see if seat exists. Is seat open? Return true. Else, return false
-  if (arr.length > row && arr[row].length > column && arr[row][column] === 0) {
-    const newArr = arr
-    newArr[row][column] = 1
-    seatsRemaining(newArr)
-    return newArr
-  }
-  console.log('So sorry. That seat is not available.')
-  seatsRemaining(arr)
-  return arr
-}
-
-const findSeats = (arr, numOfSeats) => {
-  let seatNumbers = []
-  // Reject requests for more than 10 seats
-  if (numOfSeats > 10) {
-    console.log('Sorry, no more than 10 seats can be reserved at one time.')
-    return false
-  }
-  // Find optimum seat (middle of row 1)
-  const optimumSeat = [0, Math.round(arr[1].length / 2)]
-  // Find contiguous seats closest to optimum seat
-  // Reject requests for more seats than one row can hold
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i].length < numOfSeats) {
-      console.log(
-        'Sorry, the rows are not long enough to accomidate that request.'
-      )
-      return false
-    }
-
-    // Skip to next row if there are not enough available seats
-    if (arr[i].filter(item => item === 0).length < numOfSeats) {
-      console.log('Not enough open seats in row ' + (i + 1))
-      return false
-    }
-    // Reject requests if there are not that many contiguous seats available
-    // loop over each row
-    // make an array of all the contiguous seats that are open, if there are none return false
-    // find manhattan distance of each of those seats
-    // return the group of seats with that distance
-    let count = 0
-    let potentialSeatCombinations = []
-    for (let j = 0; j < arr[i].length; j++) {
-      if (arr[i][j] === 0) {
-        count = count + 1
-      }
-      // Save this seat to the seatNumbers array
-      seatNumbers = [...seatNumbers, { row: i, column: j }]
-
-      if (count == numOfSeats) {
-        potentialSeatCombinations = [...potentialSeatCombinations, seatNumbers]
-      }
-      if (j + 1 !== arr[i].length && arr[i][j + 1] === 1) {
-        console.log('delete count')
-        count = 0
-        return null
-      }
-      console.log(potentialSeatCombinations)
-    }
-
-    if (potentialSeatCombinations.length === 0) {
-      console.log(potentialSeatCombinations)
-      console.log('Sorry, we cannot fulfill that request.')
-      seatsRemaining(arr)
-    } else if (potentialSeatCombinations.length === 1) {
-      potentialSeatCombinations[0].map(item =>
-        reserveSeat(arr, item.row, item.column)
-      )
-    } else {
-      let manhattanTotalsArr = []
-      potentialSeatCombinations.map(item => {
-        let manhattanTotal = 0
-        item.map(
-          seat =>
-            manhattanTotal + distance(optimumSeat, [seat.row, seat.column])
-        )
-        manhattanTotalsArr = [...manhattanTotalsArr, manhattanTotal]
-      })
-      potentialSeatCombinations[
-        potentialSeatCombinations.indexOf(Math.min(...manhattanTotalsArr))
-      ].map(item => reserveSeat(arr, item.row, item.column))
-    }
-  }
-}
-// return range of seats or not available
-// If seats open, reserve seats
-const seatsRemaining = arr => {
-  // Return number of open seats
-  let openSeats = 0
-  arr.map(
-    row => (openSeats = openSeats + row.filter(item => item === 0).length)
-  )
-  console.log('Open Seats: ' + openSeats)
-  inquirer.prompt(questionsThree).then(answersThree => {
-    findSeats(arr, answersThree.seats)
+const remainingSeats = (seatingArray) => {
+  let openSeat = 0
+  seatingArray.forEach(function (row) {
+    row.forEach(function (chair) {
+      openSeat += Number(chair >= 0)
+    })
   })
+  console.log(`${openSeat} seat(s) are available.`)
+}
+
+const reservedSeats = (result) => {
+  const reservedSeats = result.split(' ')
+  for (const seat of reservedSeats) {
+    const chair = seat.split('C')[1] - 1
+    const row = seat.split('C')[0].substr(1, 2) - 1
+    updateSeatingChart(row, chair, 'x')
+  }
+  remainingSeats(seatingChart)
+}
+// R1C4 R1C6 R2C3 R2C7 R3C9 R3C10
+const findSeats = (seats) => {
+  let possibleGroups = [[], 999]
+  const wantedSeats = Number(seats)
+  function add (a, b) { return a + b }
+  for (let r = 0; r < seatingChart.length; r++) {
+    for (let c = 0; c < (seatingChart[r].length - wantedSeats); c++) {
+      const group = seatingChart[r].slice(c, (c + wantedSeats))
+      if (group.indexOf('x') === -1 && group.indexOf('o') === -1) {
+        const score = group.reduce(add, 0)
+        if (score < possibleGroups[1]) {
+          possibleGroups = [[r, c], score]
+        }
+      }
+    }
+  }
+  if (possibleGroups[1] === 999) {
+    console.log(`Not Available`)
+    return
+  }
+
+  const row = possibleGroups[0][0] + 1
+  const start = possibleGroups[1] + 1
+  for (let seat = start; seat < start + wantedSeats; seat++) {
+    updateSeatingChart(row - 1, seat - 1, 'o')
+  }
+  console.log(`R${row}C${start} - R${row}C${start + wantedSeats - 1}`)
+  console.log(seatingChart)
+  remainingSeats(seatingChart)
+}
+
+const updateSeatingChart = (row, chair, flag) => {
+  seatingChart[row][chair] = flag
+  // remainingSeats(seatingChart) // Removed return
 }
