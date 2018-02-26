@@ -102,6 +102,9 @@ const findSeats = (seats) => {
   console.log(`R${row}C${start} - R${row}C${start + wantedSeats - 1}`)
   console.log(seatingChart)
   remainingSeats(seatingChart)
+  /*
+  TODO: Loop requested seats
+  */
 }
 
 const updateSeatingChart = (row, chair, flag) => {
