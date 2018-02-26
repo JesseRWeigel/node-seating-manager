@@ -30,3 +30,5 @@ src/**/*.css
 
 /uploads
 test-upload.txt
+
+test.js
