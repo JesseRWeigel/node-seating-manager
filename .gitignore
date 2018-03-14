@@ -31,8 +31,4 @@ src/**/*.css
 /uploads
 test-upload.txt
 
-<<<<<<< HEAD
-index.1.js
-=======
 test.js
->>>>>>> requestLoop
